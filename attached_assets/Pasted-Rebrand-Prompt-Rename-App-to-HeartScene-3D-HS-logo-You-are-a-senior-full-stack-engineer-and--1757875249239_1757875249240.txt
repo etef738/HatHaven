@@ -1,0 +1,101 @@
+Rebrand Prompt — Rename App to “HeartScene” (+ 3D HS logo)
+You are a senior full-stack engineer and brand migration owner.
+
+Task: Rebrand the entire project to **HeartScene** (short name: **HS**) and ship production-ready assets + code changes. Replace all prior app-name references.
+
+SCOPE
+1) Frontend (React + Tailwind)
+2) Backend (FastAPI)
+3) Assets & Icons (SVG/PNGs from a single source)
+4) Config, SEO, PWA, Docs, Tests
+
+REQUIREMENTS
+
+A) Brand Constants & Theme
+- Create /frontend/src/branding/brand.ts:
+  export const APP_NAME = "HeartScene";
+  export const APP_SHORT = "HS";
+  export const BRAND_COLORS = {
+    primary: "#e11d48",     // Tailwind rose-600
+    secondary: "#6d28d9",   // violet-700
+    accent: "#f59e0b",      // amber-500
+    dark: "#0f172a",        // slate-900
+    light: "#f8fafc"        // slate-50
+  };
+- Wire these into the global theme (Tailwind config + CSS variables). Ensure Navbar, Buttons, Links, Focus states all use these tokens.
+
+B) Logo & Wordmark (3D HS)
+- Generate vector logos in /frontend/public/brand/:
+  - hs-logo.svg (3D “HS” monogram): layered SVG using gradients (rose→violet), soft inner shadow, subtle drop shadow; legible at 24px.
+  - hs-logo-dark.svg (for light backgrounds) & hs-logo-light.svg (for dark backgrounds).
+  - heartscene-wordmark.svg (text “HeartScene” in a geometric humanist font; fallback system stack if Google Fonts unavailable).
+- Provide a Node script using sharp (or a Python Pillow script) to export app icons/favicons from hs-logo.svg into:
+  /frontend/public/icons/
+    - favicon-32.png, favicon-48.png, favicon-64.png
+    - apple-touch-icon-180.png
+    - android-chrome-192.png, android-chrome-512.png
+    - social-card-1200x630.png (OpenGraph/Twitter)
+- Add /frontend/public/site.webmanifest with:
+  { "name": "HeartScene", "short_name": "HS", "icons": [...], "theme_color": BRAND_COLORS.primary, "background_color": BRAND_COLORS.dark, "display": "standalone" }
+
+C) UI Updates
+- Replace all visible strings with `APP_NAME`:
+  - HTML <title>, Navbar, Login/Signup, Dashboard, Settings, Safety modals.
+  - In voice UI: disclosure line “You are interacting with AI in HeartScene.”
+- Update the header brand to show hs-logo + “HeartScene”.
+- Update favicon links, manifest link, and meta theme-color in index.html.
+- Add OpenGraph/Twitter meta tags:
+  og:site_name=HeartScene, og:title dynamic per page, og:image to /public/icons/social-card-1200x630.png.
+
+D) Backend (FastAPI)
+- Introduce env var APP_NAME=HeartScene; read it in settings.
+- Ensure all emails, disclaimers, logs use APP_NAME.
+- CORS allow-list: include placeholder domain envs:
+  FRONTEND_URL (e.g., https://heartscene.app), LOCAL dev hosts.
+- If email sender is templated, set FROM like "HeartScene <noreply@yourdomain>".
+
+E) Stripe / Billing Labels
+- Rename products/price descriptions to “HeartScene Premium” / “HeartScene Pro” (do NOT break existing price IDs; only update display names if safe).
+- Update billing emails/templates footers to use HeartScene.
+
+F) Safety/Legal Copy
+- Update privacy, terms, safety modals to say HeartScene.
+- Non-therapy disclaimer:
+  “HeartScene is an AI companion & coaching tool and is not a substitute for professional therapy.”
+- Add brand to Age Gate UI and voice disclosure.
+
+G) Tests
+- Add brand smoke tests:
+  - Frontend Playwright: assert Navbar renders hs-logo.svg + “HeartScene” and <title> contains HeartScene.
+  - Backend pytest: /health returns app_name=HeartScene.
+- Add snapshot test to ensure manifest name/short_name are correct.
+
+H) Developer Docs
+- Update README and /docs/BRANDING.md:
+  - Brand tokens, logo usage, light/dark backgrounds, min sizes.
+  - Asset generation script usage (npm run build:brand).
+- Add CHANGELOG entry “Rebrand to HeartScene”.
+
+I) Find/Replace & Linters
+- Safe refactor: migrate prior app-name constants to brand.ts; remove hard-coded strings.
+- Run linters/formatters and fix all references.
+
+DELIVERABLES
+- Updated UI with HeartScene branding everywhere.
+- /frontend/src/branding/brand.ts and Tailwind theme bound to BRAND_COLORS.
+- /frontend/public/brand/* SVGs + exported icons in /public/icons/.
+- site.webmanifest + meta tags wired.
+- Backend env/config updated to use APP_NAME and CORS envs.
+- Tests (frontend + backend) passing in CI.
+- Docs: README + BRANDING.md + asset build script.
+
+ACCEPTANCE CRITERIA
+- Running the app shows hs-logo + “HeartScene” in navbar, page titles, and auth pages.
+- Lighthouse badge: manifest + icons detected; theme color set.
+- Playwright tests pass: brand presence, favicon link, manifest json.
+- Backend /health returns { app_name: "HeartScene" }.
+- No stale references to prior name in codebase, docs, or emails.
+
+OPTIONAL (if time allows)
+- Generate an animated Lottie JSON of the HS monogram subtle “breathe” effect for splash screens.
+- Create dark/light social card variants (suffix -dark / -light).

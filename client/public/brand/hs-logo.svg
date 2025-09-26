@@ -1,0 +1,69 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Enhanced gradient from magenta to pink to gold -->
+    <linearGradient id="hsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e11d48"/>
+      <stop offset="50%" style="stop-color:#ec4899"/>
+      <stop offset="100%" style="stop-color:#f59e0b"/>
+    </linearGradient>
+    
+    <!-- Heart gradient -->
+    <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ec4899"/>
+      <stop offset="100%" style="stop-color:#e11d48"/>
+    </linearGradient>
+    
+    <!-- Enhanced inner shadow filter -->
+    <filter id="innerShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.5"/>
+      <feOffset dx="0" dy="1" result="offset"/>
+      <feFlood flood-color="#000000" flood-opacity="0.3"/>
+      <feComposite in2="offset" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Enhanced drop shadow filter -->
+    <filter id="dropShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="3" result="offset"/>
+      <feFlood flood-color="#000000" flood-opacity="0.2"/>
+      <feComposite in2="offset" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Glow filter for heart -->
+    <filter id="heartGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Drop shadow base -->
+  <g filter="url(#dropShadow)">
+    <!-- Letter H -->
+    <path d="M12 16 L12 48 L18 48 L18 34 L28 34 L28 48 L34 48 L34 16 L28 16 L28 28 L18 28 L18 16 Z" 
+          fill="url(#hsGradient)" 
+          filter="url(#innerShadow)"/>
+    
+    <!-- Letter S -->
+    <path d="M44 16 C39.6 16 36 19.6 36 24 C36 26.8 37.6 29.2 40 30.4 L42 31.2 C43.2 31.8 44 32.8 44 34 C44 35.6 42.6 37 41 37 L39 37 C37.4 37 36 35.6 36 34 L30 34 C30 38.4 33.6 42 38 42 L40 42 C44.4 42 48 38.4 48 34 C48 31.2 46.4 28.8 44 27.6 L42 26.8 C40.8 26.2 40 25.2 40 24 C40 22.4 41.4 21 43 21 L45 21 C46.6 21 48 22.4 48 24 L54 24 C54 19.6 50.4 16 46 16 L44 16 Z" 
+          fill="url(#hsGradient)" 
+          filter="url(#innerShadow)"/>
+  </g>
+  
+  <!-- Heart overlay positioned elegantly between H and S -->
+  <path d="M32 18 C29.5 14, 24 14, 24 22 C24 14, 18.5 14, 16 18 C13.5 22, 16 28, 24 36 C32 28, 34.5 22, 32 18 Z" 
+        fill="url(#heartGradient)" 
+        filter="url(#heartGlow)"
+        opacity="0.85"
+        transform="translate(15, 6) scale(0.8)"/>
+</svg>

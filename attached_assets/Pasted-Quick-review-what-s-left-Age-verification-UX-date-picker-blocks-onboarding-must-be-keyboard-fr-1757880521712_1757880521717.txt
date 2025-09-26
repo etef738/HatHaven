@@ -1,0 +1,88 @@
+Quick review (what’s left)
+
+Age verification UX: date picker blocks onboarding → must be keyboard-friendly, mobile-safe, and testable; also enforce server-side age logic.
+
+404/Errors: /api/* unknown routes return HTML, not JSON → unify error format + content-negotiation so SPA routes still work.
+
+Redis health: limiter falls back to memory → add health checks, alerting, and graceful degradation.
+
+Browserslist: outdated → update targets so CSS/JS are correct for iOS Safari, Android Chrome.
+
+Monitoring: logs look fine; set request IDs + JSON error bodies for traceability; add a simple uptime/redis panel.
+
+Prompt 1 — Age Verification (UX + Server Validation)
+Act as senior full-stack dev. Fix onboarding age gate.
+
+Frontend:
+- Replace date picker with accessible DOB inputs: <select> Day, <select> Month, <select> Year (range: currentYear-100 → currentYear-13).
+- Keyboard-first: auto-advance on selection; aria-labels; inline errors.
+- Mobile-safe: large touch targets; supports iOS Safari.
+- Unit test: parse DOB → ISO string.
+
+Backend (FastAPI):
+- POST /auth/verify-age { day, month, year }
+- Compute age with timezone awareness; configurable threshold via AGE_MIN (default 18, region override 17).
+- Persist: users.age_verified_at (timestamp) + users.age_verified (bool).
+- Gate voice/scenario endpoints: 403 if not age_verified.
+- Tests: <18 rejected; exactly 18 accepted; region override 17 passes.
+
+Deliverables:
+- New component AgeGate with tests (Playwright E2E: complete DOB → proceed).
+- Migration adding columns; API docs updated.
+
+Prompt 2 — API 404/Errors → JSON + SPA Routing
+Be backend/platform owner. Ensure /api/* returns JSON errors, SPA routes return index.html.
+
+FastAPI:
+- Add X-Request-ID middleware (generate UUID if missing).
+- Global exception handlers for 404, 405, 422, and generic 500 that return:
+  { "error": { "code": <int>, "type": "<NotFound|Validation|...>", "message": "...", "path": "...", "request_id": "<uuid>" } }
+  Content-Type: application/json.
+- Content negotiation: if path startswith("/api"), force JSON; otherwise let frontend serve SPA.
+- Tests: hitting /api/does-not-exist returns JSON 404; /not-a-real-page serves index.html.
+
+Frontend:
+- Handle JSON error shape; show toast with request_id.
+
+Prompt 3 — Redis Health + Rate-Limiter Hardening
+Be reliability engineer. Make Redis robust; avoid silent in-memory fallback.
+
+Implement:
+- Health probe: background task ping Redis each 5s; set redis_status=g|y|r (good|yellow|red).
+- If red: switch limiter to strict mode (tighten quotas), log WARN with request_id, surface banner in admin.
+- Metrics: expose /admin/health with redis_status, last_ping_ms, fail_count, limiter_mode.
+- Startup gate: if REDIS_REQUIRED=true and Redis unreachable, refuse start with clear log.
+- Alerts: log-based alert when red for >60s.
+
+Limiter:
+- Redis sliding-window for STT/TTS/LLM; fall back to in-memory only if ALLOW_FALLBACK=true (env).
+- Tests: simulate Redis down → strict mode; back online → normal.
+
+Prompt 4 — Browserslist + Mobile/A11y polish
+Be frontend lead. Update targets and mobile usability.
+
+- Update package.json "browserslist":
+  "production": [">0.5%", "last 2 versions", "not dead", "iOS >= 14", "Safari >= 14", "Android >= 8"],
+  "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+- Rebuild Tailwind/autoprefixer; verify no CSS regressions.
+- iOS audio init: ensure first user tap seeds AudioContext before TTS.
+- Add prefers-reduced-motion handling to voice glow/animations.
+- Lighthouse mobile: LCP <2.5s, CLS <0.1; fix if failing.
+- Tests: Playwright mobile emulation for iPhone 12 → pass AgeGate flow and voice toggle.
+
+Prompt 5 — Unified Error JSON + Request-ID in Frontend
+Be full-stack dev. Wire error shape everywhere.
+
+- Create /frontend/src/lib/http.ts fetch wrapper:
+  - Attaches X-Request-ID if present in meta; parses JSON errors to {code,type,message,requestId}.
+  - On 5xx, shows "We hit an issue. Reference: {{requestId}}".
+- Replace direct fetch calls with wrapper in auth, chat, voice, dating modules.
+- E2E tests: force 404/500 via test endpoint; assert UI shows requestId.
+
+Prompt 6 — Minimal Monitoring Panel (Admin)
+Be product analytics dev. Provide a one-look admin page.
+
+- /admin/ops shows: redis_status, voice p95 (last 15m), error_rate, safety_block_rate, active users, rate-limit hits.
+- Data via existing structured logs + /admin/health endpoint.
+- Auto-refresh every 10s; badge colors for thresholds.
+- Role-guarded (admin only).

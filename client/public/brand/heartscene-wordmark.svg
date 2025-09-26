@@ -1,0 +1,19 @@
+<svg width="200" height="40" viewBox="0 0 200 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Primary gradient for wordmark -->
+    <linearGradient id="wordmarkGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#e11d48"/>
+      <stop offset="100%" style="stop-color:#6d28d9"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- HeartScene wordmark in geometric humanist style -->
+  <text x="10" y="28" 
+        font-family="Inter, SF Pro Display, system-ui, sans-serif" 
+        font-size="24" 
+        font-weight="600" 
+        fill="url(#wordmarkGradient)" 
+        letter-spacing="-0.025em">
+    HeartScene
+  </text>
+</svg>

@@ -1,0 +1,214 @@
+Quick Evaluation (what’s good / what’s risky)
+
+✅ Core is solid: Auth, Heart Mode, Dating Training (8 scenarios), 5-D scoring, radar charts, vector memory, safety filters, telemetry. Nice.
+
+⚠️ DB: 10/12 indexes passing. Two mismatches = latent perf/consistency risk. Fix via migration, not manual SQL only.
+
+🟡 Testing: Framework ready, but coverage is light (≈60%). Critical paths (ScenarioDirector, ConversationAnalyzer, voice pipeline) need unit + e2e.
+
+🟡 Perf/Resilience: Load/chaos frameworks exist but not executed. You need thresholded runs + artifacts.
+
+🟡 Rate limiting: “Basic” isn’t enough for voice/STT/TTS cost exposure. Tune quotas + provider circuit breakers.
+
+🟡 Security: “Good” ≠ “hardened.” Add CSP/CSRF/JWT rotation/secret mgmt/2FA + storage protections.
+
+🟡 Mobile: Works, but not mobile-first. Voice UX on iOS Safari is often fragile; tighten layout & gestures.
+
+❓ Privacy/Export/Delete: Not visible in report. Add GDPR/CCPA export/delete + signed URLs + retention.
+
+✅ Deployment readiness: Looks green. Make it safer with flags, canary, backup/restore drill, SLOs & alerts.
+
+Below are focused prompts you can run one-by-one in Replit AI. Each is scoped, action-oriented, and expects code + tests + docs.
+
+🔧 Prompt A — Database Index Reconciliation & Migrations
+Act as a senior backend/database engineer.
+
+Task: reconcile the remaining 2 failing indexes and standardize schemas.
+- Create Alembic/SQL migrations to:
+  1) Align column names/types for voice_sessions, voice_analytics, dating_session_analysis to match index definitions.
+  2) Add missing FKs, ON DELETE CASCADE where appropriate.
+  3) Add composite indexes for (user_id, created_at), (mode, created_at), and pgvector HNSW/IVFFlat as configured.
+- Verify idempotency: rerunning migrations should be safe.
+- Add a DB health script that checks index validity, bloat, and FK coverage.
+Deliverables:
+- migrations/XXXXXXXX_fix_indexes.py
+- db_health_check.py and CI step that fails on missing index/FK.
+- README section: “Schema & Index Standards.”
+
+📊 Prompt B — /api/dating/progress Completion & Contract Tests
+Be the API contract owner.
+
+Task: finalize /api/dating/progress.
+- Define response schema: { sessions: [...], aggregates: { avg_scores, trends }, recommendations: [...] }.
+- Implement pagination & date filters.
+- Add contract tests: server OpenAPI → generate typed client; Zod validation in frontend.
+- Add unit tests for aggregation correctness with fixtures.
+
+Deliverables:
+- Endpoint implementation + OpenAPI docs.
+- tests/api/test_dating_progress.py
+- frontend typed client + Zod schema.
+
+🚦 Prompt C — Rate Limiting & Cost Guardrails (Voice/STT/TTS/LLM)
+You are a reliability engineer.
+
+Task: replace “basic” limits with tuned quotas + cost caps.
+- Redis sliding-window limits per user/IP for: STT calls, TTS chars, LLM tokens, daily voice minutes.
+- Soft warnings at 80%, hard stop at 100%, with graceful text-only fallback.
+- Provider circuit breaker with exponential backoff/jitter; per-provider health state.
+- Admin overrides + metrics.
+
+Deliverables:
+- rate_limits.py + tests.
+- provider_wrapper.py with circuit breaker + fault injection toggles.
+- UI toasts for quota states.
+
+🧪 Prompt D — Comprehensive Test Coverage (Target ≥85%, Critical ≥95%)
+Be the QA lead.
+
+Task: expand tests across layers.
+- Unit: ScenarioDirector, ConversationAnalyzer, SafetyGuardian edge cases.
+- Integration: voice STT→LLM→TTS pipeline with mocks and golden transcripts.
+- E2E: auth→chat→scoring→dashboard flow via Playwright.
+- Coverage thresholds: global 85%, critical packages 95% line/branch.
+
+Deliverables:
+- tests/* added with fixtures and golden sets (5 provided + add 10).
+- coverage config gating PRs.
+- CI matrix (py versions, headless browsers).
+
+📈 Prompt E — Execute Load Tests & Publish Thresholds
+Be a performance engineer.
+
+Task: run k6/Locust load tests and set pass/fail gates.
+- Scenarios: 1) 500 concurrent voice sessions, 2) 1k chat msgs/min.
+- Thresholds: Voice p95 round-trip < 2.5s, p99 < 4.0s; API p95 < 400ms.
+- Tune: DB pool, Gunicorn/Uvicorn workers, async timeouts, connection reuse.
+- Output artifacts: HTML report, flamegraphs, recommendation notes.
+
+Deliverables:
+- load/ scripts + docker runner.
+- CI job that can run smoke load on PR; full run on manual trigger.
+- PERF_REPORT.md with results + tunings applied.
+
+⚡ Prompt F — Chaos Engineering Runs (Fault Injection)
+You are a resilience engineer.
+
+Task: execute chaos tests.
+- Inject 429/500 from STT/TTS/LLM, random 5–15% packet loss, 300–800ms latency.
+- Verify fallbacks (streaming, alternative providers, text-only) and UX notices.
+- Assertions: zero unhandled exceptions, no silent failures, user never hears blocked content.
+
+Deliverables:
+- chaos/ scenarios + runbook.
+- tests/chaos/test_fault_injection.py
+- PASS/FAIL report linked in CI artifacts.
+
+🔐 Prompt G — Advanced Security Hardening
+Be the security architect.
+
+Task: harden web/app security.
+- Web: CSP (script-src 'self' + allowed CDNs), strict CORS, CSRF tokens for state-changing routes (if cookies), SameSite=Lax, HTTPS-only.
+- Auth: JWT rotation/short TTL + refresh; optional 2FA (email/OTP).
+- Passwords: argon2id + breach check; lockout/backoff on brute force.
+- Secrets: move to vault/KMS; rotate keys; env scanning in CI; dependency pinning + SAST/DAST.
+- Add reCAPTCHA/hCaptcha on signup as feature flag.
+
+Deliverables:
+- security_middleware.py + config.
+- CI: bandit/safety/dependency-review alerts.
+- SECURITY.md with threat model and controls.
+
+📱 Prompt H — Mobile-First Voice UX & Accessibility
+Be the frontend lead.
+
+Task: optimize mobile and a11y.
+- Mobile-first layout: safe-area insets (iOS), sticky PTT, large touch targets.
+- iOS Safari: gesture to unlock audio context; robust autoplay handling.
+- Accessibility: WCAG AA contrast, ARIA roles, live captions, keyboard shortcuts.
+- Lighthouse: LCP < 2.5s mobile, CLS < 0.1; bundle splitting.
+
+Deliverables:
+- responsive CSS/logic updates.
+- Lighthouse CI with thresholds.
+- A11Y checklist + axe-core tests.
+
+🛡️ Prompt I — Privacy: Export/Delete + Signed URLs + Retention
+Be the privacy-by-design engineer.
+
+Task: add GDPR/CCPA flows and storage controls.
+- /privacy/export → ZIP: transcripts.jsonl, scores.json, audio/ with signed URLs.
+- /privacy/delete → irreversibly purge rows/blobs; audit trail.
+- Signed URLs 15-min TTL for audio; at-rest encryption; lifecycle: delete raw audio after N days.
+- PII redaction verification tests.
+
+Deliverables:
+- endpoints + tests.
+- storage_adapter with signed URL issuance.
+- PRIVACY.md + user-facing help modal.
+
+🧭 Prompt J — Observability, SLOs & Alerts
+Be the SRE.
+
+Task: wire SLOs and alerting on the metrics you instrumented.
+- OpenTelemetry traces (trace_id already present) to backend of choice.
+- Dashboards: voice p95/p99, error rates, safety-blocks, cost/session.
+- SLOs: voice p95 < 2.5s (99.5% of 30-day windows), API p95 < 400ms.
+- Alerts: page on SLO burn rate; warn on rising latency or safety-block spikes.
+
+Deliverables:
+- observability/ dashboards json.
+- SLO.yaml + alert rules.
+- Oncall runbook with quick diagnostics.
+
+🚀 Prompt K — Feature Flags, Canary & DR Drill
+Be the release engineer.
+
+Task: safe deploys and recovery.
+- Server-side flags for voice, streaming, providers, NSFW policy levels.
+- Canary rollout: 5%→25%→50%→100% gated by SLO health.
+- Backup/restore: nightly DB snapshots; quarterly DR drill restoring to a fresh env; RPO/RTO docs.
+
+Deliverables:
+- flag service + admin UI.
+- canary rollout script/docs.
+- DR_DRILL.md with a completed test restore log.
+
+📜 Prompt L — API Versioning & Typed SDKs
+Be the platform owner.
+
+Task: formalize API contracts.
+- Freeze OpenAPI; bump to v1.0; add deprecation policy.
+- Generate typed SDK (TS) for frontend; publish internal package.
+- Backward-compat tests for breaking changes.
+
+Deliverables:
+- openapi.yaml v1.0
+- sdk/ts client + CI publish.
+- compat tests suite.
+
+💳 Prompt M — Billing/Entitlements Verification Suite
+Be the billing engineer.
+
+Task: prove entitlements are always correct.
+- Simulate Stripe webhook events (checkout, paid, past_due, canceled, reactivated).
+- Assert server-side gates on STT/TTS flip instantly.
+- Add grace period logic tests; admin resync endpoint test.
+
+Deliverables:
+- tests/billing/test_webhooks.py
+- fixtures for Stripe events.
+- BillingAgent docs with state diagrams.
+
+🎛️ Prompt N — Voice Analytics: Finalize & Visualize
+Be the product analytics engineer.
+
+Task: finish voice analytics polish.
+- Ensure consistent metric names/units across STT/LLM/TTS logs.
+- Add cohort charts: new vs. returning voice users; session length distribution.
+- Alerts on anomaly spikes (safety blocks, error bursts).
+
+Deliverables:
+- analytics rollup jobs.
+- dashboard panels (Recharts or Grafana).
+- anomaly detection thresholds + tests.

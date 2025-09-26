@@ -1,0 +1,122 @@
+You are a senior full-stack developer tasked with building the MVP of the “Heart & Playground” app: an AI companion and dating training web application.  
+
+⚡ Requirements:
+1. **Tech Stack**
+   - Backend: FastAPI (Python)
+   - Database: PostgreSQL with pgvector (for embeddings + memory)
+   - AI Orchestration: LangGraph-based multi-agent system
+   - Frontend: React (Vite or Next.js style structure)
+   - Authentication: JWT-based login/signup
+   - Deployment-ready with Dockerfile + requirements.txt
+
+2. **Core Features (MVP Scope, Months 1–3)**
+   - Heart Mode: 
+     - 1 AI companion chat (text + voice option).
+     - Long-term memory recall of past conversations.
+     - Performance scoring (engagement, empathy, flow).
+   - Dating Training Mode:
+     - Simple dating practice scenarios with scripted flows.
+     - Score feedback after each practice session.
+   - Basic safety:
+     - Age verification (18+).
+     - Clear AI disclosure banner.
+     - Content filter placeholder.
+   - User dashboard with:
+     - Conversation history.
+     - Progress scores.
+     - Settings.
+
+3. **Backend Requirements**
+   - FastAPI endpoints:
+     - `/auth/signup`, `/auth/login`
+     - `/chat/companion` (conversation)
+     - `/chat/scenario` (dating training)
+     - `/analyze/performance`
+   - Agents (Python classes/modules):
+     - SupervisorAgent
+     - MemoryManager
+     - SafetyGuardian
+     - DatingCoach
+     - ConversationAnalyzer
+   - PostgreSQL schema:
+     - `users` (id, email, password_hash, created_at)
+     - `conversations` (id, user_id, mode, content, timestamp)
+     - `performance_scores` (id, user_id, score_json, created_at)
+
+4. **Frontend Requirements**
+   - React components:
+     - `LoginPage`, `SignupPage`
+     - `ChatPage` (Heart Mode)
+     - `ScenarioPage` (Dating Training)
+     - `DashboardPage`
+   - UI: Clean, modern, TailwindCSS for styling.
+   - Chatbox with streaming responses.
+   - Simple analytics dashboard (progress graphs with Recharts).
+
+5. **Deployment**
+   - Dockerfile for backend.
+   - Vercel/Netlify-ready frontend build.
+   - Environment variables for API keys, DB, JWT secrets.
+
+⚡ Deliverables:
+- Generate **complete project structure** with `/backend`, `/frontend`, `/agents`, `/tests`.
+- Include **starter code** for FastAPI routes, agent classes, React components, DB schema, and Docker setup.
+- Code must run locally inside Replit but be clean enough to export into VS Code + GitHub.
+📂 Suggested Project Structure
+csharp
+Copy code
+heart-playground-mvp/
+│── backend/
+│   ├── main.py              # FastAPI entry
+│   ├── auth.py              # Login/Signup logic
+│   ├── chat_routes.py       # Chat + Scenarios endpoints
+│   ├── performance.py       # Analysis + scoring
+│   ├── database.py          # DB connection (PostgreSQL + pgvector)
+│   ├── models.py            # SQLAlchemy models
+│   ├── agents/              # AI agent modules
+│   │   ├── supervisor.py
+│   │   ├── memory_manager.py
+│   │   ├── safety_guardian.py
+│   │   ├── dating_coach.py
+│   │   └── analyzer.py
+│   ├── tests/               # Unit + integration tests
+│   └── requirements.txt
+│
+│── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── LoginPage.jsx
+│   │   │   ├── SignupPage.jsx
+│   │   │   ├── ChatPage.jsx
+│   │   │   ├── ScenarioPage.jsx
+│   │   │   └── DashboardPage.jsx
+│   │   ├── components/
+│   │   │   ├── ChatBox.jsx
+│   │   │   ├── ScoreCard.jsx
+│   │   │   └── Navbar.jsx
+│   │   ├── App.jsx
+│   │   └── index.js
+│   ├── public/
+│   └── package.json
+│
+│── docker-compose.yml
+│── Dockerfile
+│── README.md
+⚡ Backend Suggestions
+Use FastAPI + SQLAlchemy for modular endpoints.
+
+PostgreSQL with pgvector for embeddings (store conversations + recall context).
+
+Keep agents pluggable (easy to expand from 5 → 20 agents later).
+
+JWT auth for secure sessions.
+
+⚡ Frontend Suggestions
+Build with React + TailwindCSS (clean, fast, easy).
+
+Minimal UI at first: chat interface, login, progress dashboard.
+
+Add Recharts for progress visualization.
+
+Keep components modular so they scale when you expand into mobile apps later.
+

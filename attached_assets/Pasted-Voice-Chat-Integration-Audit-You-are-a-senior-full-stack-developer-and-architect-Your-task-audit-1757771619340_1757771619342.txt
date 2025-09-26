@@ -1,0 +1,33 @@
+Voice Chat Integration Audit
+You are a senior full-stack developer and architect.  
+Your task: audit and harden the new Voice Chat feature of the Heart & Playground app.  
+Voice mode was added successfully (STT with OpenAI Whisper + TTS playback + subscription gating), but now you must review, validate, and extend it to be production-grade.  
+
+✅ Check and implement:  
+1. **Server-side subscription gating** – make sure all STT/TTS endpoints enforce Pro tier checks on the backend, not only in the UI.  
+2. **Memory Integration** – transcripts must be stored in PostgreSQL with pgvector embeddings, linked to sessions, and PII-redacted before storage.  
+3. **Safety Guardian** – apply safety filtering both on user input (post-STT) and model output (pre-TTS). Nothing unsafe should ever be played aloud.  
+4. **Latency Budget** – measure end-to-end (mic stop → transcript → AI response → playback). Keep p95 < 2.5s. If higher, enable streaming or partial response playback.  
+5. **Cross-Platform UX** – confirm mic/voice works on Chrome, Safari (desktop + iOS), Android Chrome, and Edge. Safari iOS autoplay is usually problematic.  
+
+🔒 Security & Privacy:  
+- Encrypt transcripts/audio at rest.  
+- Add short-lived signed URLs for audio files.  
+- Implement rate limiting and daily voice minute caps per user.  
+- Add “Export/Delete My Voice Data” flows (GDPR/CCPA).  
+
+🎨 UX Improvements:  
+- Add push-to-talk button and/or voice activity detection.  
+- Support barge-in (user interrupts playback).  
+- Show live captions while speaking.  
+- Provide in-UI disclaimers: “You are speaking with AI, not a therapist.”  
+
+📊 Analytics:  
+- Collect voice metrics (avg. session length, latency, STT/TTS error rates, blocked responses).  
+- Feed into AnalyticsCollector agent.  
+
+⚡ Deliverables:  
+- Updated FastAPI endpoints (`/chat/voice`, `/chat/tts`) with server-side gating, logging, and safety checks.  
+- PostgreSQL schema update for storing voice sessions.  
+- React UI update: push-to-talk button, captions, clear AI disclosure.  
+- Documentation of known limitations + fallback behavior.  
